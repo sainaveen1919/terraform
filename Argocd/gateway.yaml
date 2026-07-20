@@ -3,5 +3,5 @@ kind: GatewayClass
 metadata:
   name: shared-gateway-class
 spec:
-  controllerName: gateway.envoproxy.io/gatewayclass-controller
+  controllerName: envoyproxies.gateway.envoyproxy.io/gatewayclass-controller
   description: "Shared Gateway Class for Envoy Gateway"
