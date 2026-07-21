@@ -7,7 +7,7 @@ metadata:
     argo-cd.argoproj.io/sync-options: SkipDryRunOnServer=true
 spec:
   addresses:
-    - 192.168.1.0-192.168.1.30
+    - 192.168.1.200-192.168.1.210
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
