@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: {{ include "mlflow.fullname" . }}
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "mlflow.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mlflow.name" . }}
+    spec:
+      serviceAccountName: {{ include "mlflow.fullname" . }}
+      containers:
+      - name: mlflow
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+        - mlflow
+        - server
+        args:
+        - --host=0.0.0.0
+        - --port=5000
+        - --static-prefix=/mlflow
+        - --backend-store-uri
+        - postgresql://{{ .Values.postgres.username }}:{{ .Values.postgres.password }}@{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}
+        - --artifacts-destination
+        - s3://{{ .Values.minio.bucket }}
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.minio.secretname }}
+              key: accesskey
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.minio.secretname }}
+              key: secretkey
+        - name: MLFLOW_S3_ENDPOINT_URL
+          value: {{ .Values.minio.endpoint }}
+
+        ports:
+        - containerPort: 5000
+
+        resources:
+          requests:
+            cpu: {{ .Values.requests.cpu }}
+            memory: {{ .Values.requests.memory }}
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
